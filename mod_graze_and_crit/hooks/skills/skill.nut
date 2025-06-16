@@ -216,8 +216,14 @@
 			outcomeMessage = this.Const.UI.getColorized("grazes", colors.graze);
 			properties.DamageTotalMult *= ::GrazeAndCrit.Config.Multipliers.graze;
 			properties.FatigueDealtPerHitMult *= ::GrazeAndCrit.Config.Multipliers.graze;
-			// TODO(Graze and Crit): Only do this a percentage of the time, defined by a parameter.
-      applyEffects = false;
+
+      // Determine whether this is a graze that can apply status effects or not.
+      // Instead of a new roll, divide the range [threshold.hit, threshold.graze]
+      // and use the existing roll (smaller is better = applies status effect).
+      local status_chance = 1.0 - ::GrazeAndCrit.Config.graze_count_as_miss_percentage/100.0;
+      local status_threshold = thresholds.graze * status_chance 
+                               + thresholds.hit * (1.0 - status_chance);
+      applyEffects = roll <= status_threshold;      
 		}
 		else {
 			assert(roll <= thresholds.miss + 0.01);

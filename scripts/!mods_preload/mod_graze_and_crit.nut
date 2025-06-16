@@ -106,4 +106,15 @@
 		"Defense to halve hit chance",
 		"Increasing defense by this amount halves the hit chance when logarithmic decay is enabled. Applies cumulatively and considers fractional values. [Default: 35 (results in a seamless transition from linear to logarithmic)]")
 	.addBeforeChangeCallback(function( _newValue ) { ::GrazeAndCrit.Config.DefenseToHalveHitChance = _newValue; });
+
+	generalSettings.addTitle("grazeMissChance", "Percentage of grazes that fail to apply effects", "With this setting, some grazes are registered as misses for various effects (disarm, stun, etc) but they still apply their damage.");
+	generalSettings.addRangeSetting(
+		"GC_GrazeMissChance",
+		::GrazeAndCrit.Config.graze_count_as_miss_percentage, 
+		0.0, 100.0, 5.0,
+		"Graze",
+		"[Default: 50 percent]")
+	.addBeforeChangeCallback(function( _newValue ) { ::GrazeAndCrit.Config.graze_count_as_miss_percentage = _newValue; });
+
+
 });

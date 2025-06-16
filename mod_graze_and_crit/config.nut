@@ -20,6 +20,8 @@
 		crit = 1.5,
 	},
 
+  graze_count_as_miss_percentage = 50.0,
+
 	HitOutcomeColors = {
 		// TODO: Config?
 		miss  = "#4a4747",
