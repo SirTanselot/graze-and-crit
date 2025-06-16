@@ -194,7 +194,8 @@
 		_targetEntity.onAttacked(_user);
 
 		// Graze and crit change: Compute outcome and update damage.
-		local isHit = true;
+    local doDamage = true;
+    local applyEffects = true;
 		local thresholds = attackInfo.GC_OutcomeThresholds;
 		local colors = ::GrazeAndCrit.Config.HitOutcomeColors;
 		local outcomeMessage;
@@ -215,12 +216,14 @@
 			outcomeMessage = this.Const.UI.getColorized("grazes", colors.graze);
 			properties.DamageTotalMult *= ::GrazeAndCrit.Config.Multipliers.graze;
 			properties.FatigueDealtPerHitMult *= ::GrazeAndCrit.Config.Multipliers.graze;
-			// TODO(Graze and Crit): Modify status effect chance.
+			// TODO(Graze and Crit): Only do this a percentage of the time, defined by a parameter.
+      applyEffects = false;
 		}
 		else {
 			assert(roll <= thresholds.miss + 0.01);
 			outcomeMessage = this.Const.UI.getColorized("misses", colors.miss);
-			isHit = false;
+      doDamage = false;
+      applyEffects = false;
 		}
 		attackInfo.GC_OutcomeMessage = outcomeMessage;
 
@@ -229,15 +232,14 @@
 			this.MV_printAttackToLog(attackInfo);
 		}
 
-		if (isHit)
-		{
-			this.MV_onAttackEntityHit(attackInfo);
-			return true;
-		}
-		else
-		{
-			this.MV_onAttackEntityMissed(attackInfo);
-			return false;
-		}
+    if (doDamage) {
+      this.MV_onAttackEntityHit(attackInfo);
+    }
+    else {
+ 			this.MV_onAttackEntityMissed(attackInfo);
+    }
+    // HACKY SHOT IN THE DARK: skills seem to use this return value to decide 
+    // whether to apply effects or not.
+    return applyEffects;
 	};
 });
