@@ -19,40 +19,33 @@
 	local generalSettings = ::GrazeAndCrit.Mod.ModSettings.addPage("General");
 	local damageSettings = ::GrazeAndCrit.Mod.ModSettings.addPage("Damage");
 
-	// Disabled for now until I figure out how to cap/uncap hit chance based on this setting.
-	// page.addBooleanSetting(
-	// 	"GC_Enable", 
-	// 	true, 
-	// 	"Enable Graze and Crit", 
-	// 	"Enables hits to graze for half damage or crit for 1.5x damage, based on roll. (Disabling this still keeps hit/miss chances uncapped.)")
-	// .addBeforeChangeCallback(function( _newValue) { ::GrazeAndCrit.Config.IsEnabled = _newValue; });
+	generalSettings.addBooleanSetting(
+		"GC_Enable", 
+		true, 
+		"Enable Graze and Crit")
+	.addBeforeChangeCallback(function( _newValue) { 
+    ::GrazeAndCrit.Config.IsEnabled = _newValue; 
+    if (_newValue == true) {
+      ::Const.Combat.MV_HitChanceMin = -1000;
+      ::Const.Combat.MV_HitChanceMax = 1000;
+    }
+    else {
+      ::Const.Combat.MV_HitChanceMin = 5;
+      ::Const.Combat.MV_HitChanceMax = 95;
+    }
+  });
 
-	damageSettings.addTitle("damageModifiersTitle", "Damage Multipliers");
+	// generalSettings.addTitle("grazeMissChance", "Percentage of grazes that fail to apply effects", "With this setting, some grazes are registered as misses for various effects (disarm, stun, etc) but they still apply their damage.");
+	generalSettings.addRangeSetting(
+		"GC_GrazeMissChance",
+		::GrazeAndCrit.Config.graze_count_as_miss_percentage, 
+		0.0, 100.0, 5.0,
+		"Percentage of grazes that fail to apply effects",
+		"Experimental feature that makes some portion of grazes to not register as hits for the purposes of applying certain effects. [Default: 50 percent. Set to 0 to disable.]")
+	.addBeforeChangeCallback(function( _newValue ) { ::GrazeAndCrit.Config.graze_count_as_miss_percentage = _newValue; });
 
-	damageSettings.addRangeSetting(
-		"GC_CritDamage",
-		::GrazeAndCrit.Config.Multipliers.crit, 
-		0.0, 4.0, 0.05,
-		"Crit",
-		"[Default: 1.5]")
-	.addBeforeChangeCallback(function( _newValue ) { ::GrazeAndCrit.Config.Multipliers.crit = _newValue; });
-
-	damageSettings.addRangeSetting(
-		"GC_HitDamage",
-		::GrazeAndCrit.Config.Multipliers.hit, 
-		0.0, 4.0, 0.05,
-		"Hit",
-		"[Default: 1.0]")
-	.addBeforeChangeCallback(function( _newValue ) { ::GrazeAndCrit.Config.Multipliers.hit = _newValue; });
-
-	damageSettings.addRangeSetting(
-		"GC_GrazeDamage",
-		::GrazeAndCrit.Config.Multipliers.graze, 
-		0.0, 4.0, 0.05,
-		"Graze",
-		"[Default: 0.5]")
-	.addBeforeChangeCallback(function( _newValue ) { ::GrazeAndCrit.Config.Multipliers.graze = _newValue; });
-
+  // ADVANTAGE
+  // TODO: New page?
 	generalSettings.addTitle("hitChanceTitle", "Advantage", "Advantage is the uncapped vanilla hit chance and is used by this mod to determine the chances that an attack crits, hits, grazes or misses. The settings below allow changing the computation of advantage as (uncapped_vanilla_hitchance + additive) * multiplicative.");
 
 	generalSettings.addRangeSetting(
@@ -107,14 +100,30 @@
 		"Increasing defense by this amount halves the hit chance when logarithmic decay is enabled. Applies cumulatively and considers fractional values. [Default: 35 (results in a seamless transition from linear to logarithmic)]")
 	.addBeforeChangeCallback(function( _newValue ) { ::GrazeAndCrit.Config.DefenseToHalveHitChance = _newValue; });
 
-	generalSettings.addTitle("grazeMissChance", "Percentage of grazes that fail to apply effects", "With this setting, some grazes are registered as misses for various effects (disarm, stun, etc) but they still apply their damage.");
-	generalSettings.addRangeSetting(
-		"GC_GrazeMissChance",
-		::GrazeAndCrit.Config.graze_count_as_miss_percentage, 
-		0.0, 100.0, 5.0,
+  
+	damageSettings.addTitle("damageModifiersTitle", "Damage Multipliers");
+
+	damageSettings.addRangeSetting(
+		"GC_CritDamage",
+		::GrazeAndCrit.Config.Multipliers.crit, 
+		0.0, 4.0, 0.05,
+		"Crit",
+		"[Default: 1.5]")
+	.addBeforeChangeCallback(function( _newValue ) { ::GrazeAndCrit.Config.Multipliers.crit = _newValue; });
+
+	damageSettings.addRangeSetting(
+		"GC_HitDamage",
+		::GrazeAndCrit.Config.Multipliers.hit, 
+		0.0, 4.0, 0.05,
+		"Hit",
+		"[Default: 1.0]")
+	.addBeforeChangeCallback(function( _newValue ) { ::GrazeAndCrit.Config.Multipliers.hit = _newValue; });
+
+	damageSettings.addRangeSetting(
+		"GC_GrazeDamage",
+		::GrazeAndCrit.Config.Multipliers.graze, 
+		0.0, 4.0, 0.05,
 		"Graze",
-		"[Default: 50 percent]")
-	.addBeforeChangeCallback(function( _newValue ) { ::GrazeAndCrit.Config.graze_count_as_miss_percentage = _newValue; });
-
-
+		"[Default: 0.5]")
+	.addBeforeChangeCallback(function( _newValue ) { ::GrazeAndCrit.Config.Multipliers.graze = _newValue; });
 });

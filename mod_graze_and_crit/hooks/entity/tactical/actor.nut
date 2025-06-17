@@ -19,7 +19,8 @@
 		}
 
 		// Graze and Crit: Only diminish def above 50 if allowed by config.
-		if (::GrazeAndCrit.Config.KeepVanillaDiminishingDefense && d > 50)
+    local diminishDefense = !::GrazeAndCrit.Config.IsEnabled || ::GrazeAndCrit.Config.KeepVanillaDiminishingDefense;
+		if (diminishDefense && d > 50)
 		{
 			local e = d - 50;
 			d = 50 + e * 0.5;
