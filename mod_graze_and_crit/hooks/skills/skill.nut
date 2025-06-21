@@ -239,6 +239,9 @@
 		}
 
     if (doDamage) {
+      if (!applyEffects) {
+        ::logInfo("Graze applying damage without status effects.")
+      }
       this.MV_onAttackEntityHit(attackInfo);
     }
     else {
