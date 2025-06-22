@@ -14,7 +14,7 @@
   }
 
   // Follows the computation here: https://www.desmos.com/calculator/z0au984k3r
-  function computeHitOutcomeChancesTriangleMethod ( _advantage ) {
+  function computePiecewiseLinearHitOutcomeChances ( _advantage ) {
 		// Expressed as percentages. Should sum up to 100.0.
 		local chances = {
 			miss  = 0.0,
@@ -58,7 +58,7 @@
   }
 
   // Follows the computation here: https://www.desmos.com/calculator/u7jbnzpvwa
-  function computeHitOutcomeChancesThreeRollLogisticsMethod ( _advantage ) {
+  function computeLogisticsCurveHitOutcomeChances ( _advantage ) {
     // NOTE 1: These parameters are selected to track vanilla expected damage 
     // almost exactly from 50-100 attack.
     // NOTE 2: There is no need to expose these parameters to config since the 
@@ -94,10 +94,10 @@
 		local isShowingValue = false;
 		switch (::GrazeAndCrit.Mod.ModSettings.getSetting("GC_Model").getValue())
 		{
-			case "Triangular":
-        return computeHitOutcomeChancesTriangleMethod(advantage);
-			case "Logistics":
-        return computeHitOutcomeChancesThreeRollLogisticsMethod(advantage);
+			case "Piecewise Linear":
+        return computePiecewiseLinearHitOutcomeChances(advantage);
+			case "Logistics Curve":
+        return computeLogisticsCurveHitOutcomeChances(advantage);
 		}
 	}
 

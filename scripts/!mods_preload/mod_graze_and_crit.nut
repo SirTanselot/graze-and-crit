@@ -35,12 +35,12 @@
 
  	generalSettings.addEnumSetting(
     "GC_Model", 
-    "Triangular", 
-    ["Triangular", 
-     "Logistics"
+    "Piecewise Linear", 
+    ["Piecewise Linear", 
+     "Logistics Curve"
     ], 
     "Hit chance model", 
-    "\'Triangular\': Graze and hit chances first linearly increase then linearly decrease with Advantage, forming two triangles that peak at 50 and 100, respectively. It is a simple model and guarantees 0% miss, graze, hit or crit chances at certain breakpoints. It optionally allows for a logarithmic decay of graze chance to ensure that there is always some chance for a hit. \n\n\'Logistics\': Uses more complicated math behind the scenes to ensure that expected damage and outcome chances scale smoothly with Advantage. It allows all outcomes to happen at any Advantage, possibly at a significantly reduced rate. (For instance, crit chance is 0.4%, 0.1% and 0% at 15, 0 and -15 Advantage, respectively.)");
+    "\'Piecewise Linear\': Graze and hit chances first linearly increase then linearly decrease with Advantage, forming two triangles that peak at 50 and 100, respectively. It is a simple model and guarantees 0% miss, graze, hit or crit chances at certain breakpoints. It optionally allows for a logarithmic decay of graze chance to ensure that there is always some chance for a hit. \n\n\'Logistics Curve\': Uses more complicated math behind the scenes to ensure that expected damage and outcome chances scale smoothly with Advantage. It allows all outcomes to happen at any Advantage, possibly at a significantly reduced rate. (For instance, crit chance is 0.4%, 0.1% and 0% at 15, 0 and -15 Advantage, respectively.)");
 
 	generalSettings.addBooleanSetting(
 		"GC_KeepVanillaDiminishingDefense", 
@@ -96,7 +96,7 @@
 		"Show advantage in tooltip")
 	.addBeforeChangeCallback(function( _newValue) { ::GrazeAndCrit.Config.ShowAdvantageTooltip = _newValue; });
 
-	generalSettings.addTitle("triangularModelSettings", "Triangular Model Settings");
+	generalSettings.addTitle("triangularModelSettings", "Piecewise Linear Model Settings");
 
 	generalSettings.addBooleanSetting(
 		"GC_EnableLogarithmicDefenseDecay", 
