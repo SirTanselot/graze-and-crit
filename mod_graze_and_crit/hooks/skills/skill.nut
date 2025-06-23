@@ -194,52 +194,22 @@
 		_targetEntity.onAttacked(_user);
 
 		// Graze and crit change: Compute outcome and update damage.
-    local doDamage = true;
-    local applyEffects = true;
-		local thresholds = attackInfo.GC_OutcomeThresholds;
-		local colors = ::GrazeAndCrit.Config.HitOutcomeColors;
-		local outcomeMessage;
+    local outcome = ::GrazeAndCrit.Core.computeOutcome(
+      attackInfo.Roll = roll, attackInfo.GC_OutcomeThresholds);
 
-		if (roll <= thresholds.crit) {
-			outcomeMessage = this.Const.UI.getColorized("critically hits", colors.crit);
-			properties.DamageTotalMult *= ::GrazeAndCrit.Config.Multipliers.crit;
-			properties.FatigueDealtPerHitMult *= ::GrazeAndCrit.Config.Multipliers.crit;
-			// TODO(Graze and Crit): Modify status effect chance.
-		}
-		else if (roll <= thresholds.hit) {
-			outcomeMessage = this.Const.UI.getColorized("hits", colors.hit);
-			properties.DamageTotalMult *= ::GrazeAndCrit.Config.Multipliers.hit;
-			properties.FatigueDealtPerHitMult *= ::GrazeAndCrit.Config.Multipliers.hit;
-			// TODO(Graze and Crit): Modify status effect chance.
-		}
-		else if (roll <= thresholds.graze) {
-			outcomeMessage = this.Const.UI.getColorized("grazes", colors.graze);
-			properties.DamageTotalMult *= ::GrazeAndCrit.Config.Multipliers.graze;
-			properties.FatigueDealtPerHitMult *= ::GrazeAndCrit.Config.Multipliers.graze;
-
-      // Determine whether this is a graze that can apply status effects or not.
-      // Instead of a new roll, divide the range [threshold.hit, threshold.graze]
-      // and use the existing roll (smaller is better = applies status effect).
-      local status_chance = 1.0 - ::GrazeAndCrit.Config.graze_count_as_miss_percentage/100.0;
-      local status_threshold = thresholds.graze * status_chance 
-                               + thresholds.hit * (1.0 - status_chance);
-      applyEffects = roll <= status_threshold;      
-		}
-		else {
-			assert(roll <= thresholds.miss + 0.01);
-			outcomeMessage = this.Const.UI.getColorized("misses", colors.miss);
-      doDamage = false;
-      applyEffects = false;
-		}
-		attackInfo.GC_OutcomeMessage = outcomeMessage;
+    if (outcome.doDamage) {
+      properties.DamageTotalMult *= outcome.damageMultiplier;
+	  	properties.FatigueDealtPerHitMult *= outcome.damageMultiplier;
+    }
+		attackInfo.GC_OutcomeMessage = outcome.message;
 
 		if (!_user.isHiddenToPlayer() && !_targetEntity.isHiddenToPlayer())
 		{
 			this.MV_printAttackToLog(attackInfo);
 		}
 
-    if (doDamage) {
-      if (!applyEffects) {
+    if (outcome.doDamage) {
+      if (!outcome.applyEffects) {
         ::logInfo("Graze applying damage without status effects.")
       }
       this.MV_onAttackEntityHit(attackInfo);
@@ -249,6 +219,6 @@
     }
     // HACKY SHOT IN THE DARK: skills seem to use this return value to decide 
     // whether to apply effects or not.
-    return applyEffects;
+    return outcome.applyEffects;
 	};
 });

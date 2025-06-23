@@ -136,4 +136,44 @@
 
 		return thresholds;
 	}
+
+  function computeOutcome ( _roll, _thresholds ) {
+    local outcome = {
+      doDamage = true,
+      applyEffects = true,
+      damageMultiplier = 1.0,
+      message = "",
+    };
+
+		local colors = ::GrazeAndCrit.Config.HitOutcomeColors;
+
+		if (_roll <= _thresholds.crit) {
+			outcome.message = this.Const.UI.getColorized("critically hits", colors.crit);
+			outcome.damageMultiplier = ::GrazeAndCrit.Config.Multipliers.crit;
+		}
+		else if (_roll <= _thresholds.hit) {
+			outcome.message = this.Const.UI.getColorized("hits", colors.hit);
+			outcome.damageMultiplier = ::GrazeAndCrit.Config.Multipliers.hit;
+		}
+		else if (_roll <= _thresholds.graze) {
+			outcome.message = this.Const.UI.getColorized("grazes", colors.graze);
+      outcome.damageMultiplier = ::GrazeAndCrit.Config.Multipliers.graze;
+
+      // Determine whether this is a graze that can apply status effects or not.
+      // Instead of a new roll, divide the range [threshold.hit, threshold.graze]
+      // and use the existing roll (smaller is better = applies status effect).
+      local status_chance = 1.0 - ::GrazeAndCrit.Config.graze_count_as_miss_percentage/100.0;
+      local status_threshold = _thresholds.graze * status_chance 
+                               + _thresholds.hit * (1.0 - status_chance);
+      outcome.applyEffects = _roll <= status_threshold;      
+		}
+		else {
+			assert(_roll <= _thresholds.miss + 0.01);
+			outcome.message = this.Const.UI.getColorized("misses", colors.miss);
+      outcome.doDamage = false;
+      outcome.applyEffects = false;
+		}
+    
+    return outcome;
+  }
 }
