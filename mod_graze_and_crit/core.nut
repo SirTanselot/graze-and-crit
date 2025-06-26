@@ -44,7 +44,7 @@
       return _x*_x/0.5;
     }
     if (_x < 1.0) {
-      return 1 - (x-1)*(x-1)/0.5;
+      return 1.0 - (_x-1.0)*(_x-1.0)/0.5;
     }
     return 1.0;
   }
@@ -60,12 +60,11 @@
 		};
     
     local computeChanceByDistanceFromPeak = function(_peak) {
-			// Computes roundToPrecision(this.Math.max(0.0, 50.0 - 0.5 * this.Math.abs(peak - advantage))) but works for floats.
+			// Computes this.Math.max(0.0, 50.0 - 0.5 * this.Math.abs(peak - advantage)) but works for floats.
 			local diff = _peak - _advantage;
 			diff = diff < 0 ? -diff : diff;	// this.Math.abs but for floats.
 			local chance = 50.0 - 0.5 * diff;
-			chance = chance < 0 ? 0 : chance; // this.Math.max(0, chance) but for floats.
-			return roundToPrecision(chance);
+			return chance < 0 ? 0 : chance; // this.Math.max(0, chance) but for floats.
 		};
 
 		// {-50 ->  50 -> 150} advantage = {  0 ->  50 ->  0}% chance to graze for half damage.
@@ -78,9 +77,7 @@
 		if (::GrazeAndCrit.Config.EnableLogarithmicDefenseDecay && _advantage < 0.0) {	
 			// Below 0: All hits are grazes. 0 is 25% chance for a grazing hit. Every DefenseToHalveHitChance halves this chance.
 			local exponent = (0 - _advantage) / ::GrazeAndCrit.Config.DefenseToHalveHitChance;
-			local graze = 25.0 * this.Math.pow(0.5, exponent);
-			// Only use the first two decimal places.
-			chances.graze = roundToPrecision(graze);
+			chances.graze = 25.0 * this.Math.pow(0.5, exponent);
 		}
 
 		local remainder = 100.0 - (chances.graze + chances.hit + chances.crit);
@@ -91,7 +88,6 @@
 			chances.miss = chances.miss + remainder;
 		}
 
-    // TODO: Switch to use roundAndVerify.
 		return chances;
   }
 
@@ -109,21 +105,14 @@
     local s = logisticsCurve100(_advantage, growth_rate, mid)/100.0;
     local f = 1.0-s;
 
-    // TODO: Switch to use roundAndVerify.
     // Use the 3-headed flail model of damage, where 0 successes result in a 
     // miss and 3 successes result in a critical hit.
 		local chances = {
-			miss  = roundToPrecision(100 * f * f * f), 
-			graze = roundToPrecision(300 * f * f * s),
-			hit   = roundToPrecision(300 * f * s * s),
-			crit  = roundToPrecision(100 * s * s * s),
+			miss  = 100 * f * f * f, 
+			graze = 300 * f * f * s,
+			hit   = 300 * f * s * s,
+			crit  = 100 * s * s * s,
 		};
-
-    // Fix possible rounding errors.
-    local newMissChance = 100.0 - chances.graze - chances.hit - chances.crit;
-    assert(abs(chances.miss - newMissChance) < 0.01);
-    chances.miss = newMissChance;
-
 		return chances;
   }
 
@@ -182,16 +171,20 @@
 	function getHitOutcomeChances( _baseToHit ) {
 		local advantage = computeAdvantage(_baseToHit);
     
-		local isShowingValue = false;
+		local chances;
 		switch (::GrazeAndCrit.Mod.ModSettings.getSetting("GC_Model").getValue())
 		{
 			case "Piecewise Linear":
-        return computePiecewiseLinearHitOutcomeChances(advantage);
+        chances = computePiecewiseLinearHitOutcomeChances(advantage);
+        break;
 			case "Smooth":
-        return computeLogisticsCurveHitOutcomeChances(advantage);
+        chances = computeLogisticsCurveHitOutcomeChances(advantage);
+        break;
       case "Smooth with Guarantees":
-        return computeLogisticsCurveWithGuaranteesHitOutcomeChances(advantage);
+        chances = computeLogisticsCurveWithGuaranteesHitOutcomeChances(advantage);
+        break;
 		}
+    return roundAndVerify(chances);
 	}
 
 	function getAlwaysHitOutcomeChances() {
