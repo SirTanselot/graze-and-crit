@@ -8,9 +8,45 @@
 		return this.Math.round( _val * precisionMultiplier) / precisionMultiplier;
 	}
   
-  function logisticsCurve ( _x, _growth, _mid ) {
+  function roundAndVerify ( _chances ) {
+    local chances = {
+      miss = roundToPrecision(_chances.miss),
+      graze = roundToPrecision(_chances.graze),
+      hit = roundToPrecision(_chances.hit),
+      crit = roundToPrecision(_chances.crit),
+    };
+    
+    // Fix possible rounding errors.
+    local newMissChance = 100.0 - chances.graze - chances.hit - chances.crit;
+    assert(abs(chances.miss - newMissChance) < 0.01);
+    chances.miss = newMissChance;
+    
+    assert(chances.miss >= 0);
+    assert(chances.graze >= 0);
+    assert(chances.hit >= 0);
+    assert(chances.crit >= 0);
+		return chances;
+  }
+
+  function logisticsCurve100 ( _x, _growth, _mid ) {
     local val = (_x - _mid) / 100.0;
     return 100.0 / (1.0 + exp(-_growth * val));
+  }
+  
+  // A piecewise quadratic function. As _x increases from 0 to 1, f(x) also
+  // also increases from 0 to 1. It's slope begins and ends at 0 and is 
+  // continuous, giving the function a smooth look even in [-inf, inf] range.
+  function quadraticS (_x) {
+    if (_x < 0.0) {
+      return 0.0;
+    }
+    if (_x < 0.5) {
+      return _x*_x/0.5;
+    }
+    if (_x < 1.0) {
+      return 1 - (x-1)*(x-1)/0.5;
+    }
+    return 1.0;
   }
 
   // Follows the computation here: https://www.desmos.com/calculator/z0au984k3r
@@ -54,6 +90,8 @@
 		else {
 			chances.miss = chances.miss + remainder;
 		}
+
+    // TODO: Switch to use roundAndVerify.
 		return chances;
   }
 
@@ -68,9 +106,10 @@
     local mid = 75.0
 
     // s = success_chance, f = fail_chance.
-    local s = logisticsCurve(_advantage, growth_rate, mid)/100.0;
+    local s = logisticsCurve100(_advantage, growth_rate, mid)/100.0;
     local f = 1.0-s;
 
+    // TODO: Switch to use roundAndVerify.
     // Use the 3-headed flail model of damage, where 0 successes result in a 
     // miss and 3 successes result in a critical hit.
 		local chances = {
@@ -88,6 +127,58 @@
 		return chances;
   }
 
+  // TODO: Graph
+  // Similar to computeLogisticsCurveHitOutcomeChances, but guarantees no crits 
+  // below 50 and no full hits below 0 advantage.
+  function computeLogisticsCurveWithGuaranteesHitOutcomeChances ( _advantage ) {
+    local x = _advantage;
+    local chances = computeLogisticsCurveHitOutcomeChances(x);
+
+    // Ensure that normal hits don't happen below 0 advantage.
+    local hitReduction = 0;
+    if (x < 0) {
+      hitReduction = chances.hit;
+    }
+    else {
+      // We want to reduce hit above 0 as well so that the transition is 
+      // smooth. To ensure that both the transition and the slope of the 
+      // transition is smooth and continuous, we do the following:
+      // 1) Below 0, we know the original hit function hit(x) is smooth.
+      // 2) Above 0, we reflect the below-0 part around (x, hit(x)). This has
+      //    the unintended side effect that we are now trying to remove more
+      //    hit above 0 than below 0.
+      // 3) We gradually decay the above 0 part down to 0.
+      local hitAtZero = computeLogisticsCurveHitOutcomeChances(0).hit;
+      local hitAtMinusX = computeLogisticsCurveHitOutcomeChances(-x).hit;
+      hitReduction = 2*hitAtZero - hitAtMinusX; // Reflect.
+      hitReduction = hitReduction * (1.0 - quadraticS(x/150)); // Decay.      
+    }
+
+    // Ensure that crits don't happen below 50 advantage.
+    local critReduction = 0;
+    if (x < 50) {
+      critReduction = chances.crit;
+    }
+    else {
+      // Same logic as hits, except we reflect around (50, crit(50))
+      local critAt50 = computeLogisticsCurveHitOutcomeChances(50).crit;
+      local critAt100MinusX = computeLogisticsCurveHitOutcomeChances(100.0 - x).crit;
+      critReduction = 2*critAt50 - critAt100MinusX; // Reflect.
+      critReduction = critReduction * (1.0 - quadraticS((x - 50)/150)); // Decay.      
+    }
+
+    // Shuffle around chances while ensuring that expected damage is the same.
+    chances.hit -= hitReduction;
+    chances.graze += 2*hitReduction;
+    chances.miss -= hitReduction;
+
+    chances.crit -= critReduction;
+    chances.hit += 2*critReduction;
+    chances.graze -= critReduction;
+
+    return roundAndVerify(chances)
+  }
+
 	function getHitOutcomeChances( _baseToHit ) {
 		local advantage = computeAdvantage(_baseToHit);
     
@@ -98,6 +189,8 @@
         return computePiecewiseLinearHitOutcomeChances(advantage);
 			case "Logistics Curve":
         return computeLogisticsCurveHitOutcomeChances(advantage);
+      case "Logistics Curve with Guarantees":
+        return computeLogisticsCurveWithGuaranteesHitOutcomeChances(advantage);
 		}
 	}
 
