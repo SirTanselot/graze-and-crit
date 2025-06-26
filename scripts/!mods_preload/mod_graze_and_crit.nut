@@ -37,11 +37,11 @@
     "GC_Model", 
     "Piecewise Linear", 
     ["Piecewise Linear", 
-     "Logistics Curve",
-     "Logistics Curve with Guarantees"
+     "Smooth",
+     "Smooth with Guarantees"
     ], 
     "Hit chance model", 
-    "\'Piecewise Linear\': Graze and hit chances first linearly increase then linearly decrease with Advantage, forming two triangles that peak at 50 and 100, respectively. It is a simple model and guarantees 0% miss, graze, hit or crit chances at certain breakpoints. It optionally allows for a logarithmic decay of graze chance to ensure that there is always some chance for a hit. \n\n\'Logistics Curve\': Uses more complicated math behind the scenes to ensure that expected damage and outcome chances scale smoothly with Advantage. It allows all outcomes to happen at any Advantage, possibly at a significantly reduced rate. (For instance, crit chance is 0.4%, 0.1% and 0% at 15, 0 and -15 Advantage, respectively.) \n\n\'Logistics Curve with Guarantees: Disables crits below 50 and hits below 0 advantage (grazes and misses can always happen).\'");
+    "\'Piecewise Linear\': Graze and hit chances first linearly increase then linearly decrease with Advantage, forming two triangles that peak at 50 and 100, respectively. It is a simple model and guarantees 0% miss, graze, hit or crit chances at certain breakpoints. It optionally allows for a logarithmic decay of graze chance to ensure that there is always some chance for a hit. \n\n\'Smooth\': Uses more complicated math behind the scenes to ensure that expected damage and outcome chances scale smoothly with Advantage. It allows all outcomes to happen at any Advantage, possibly at a significantly reduced rate. (For instance, crit chance is 0.4%, 0.1% and 0% at 15, 0 and -15 Advantage, respectively.) \n\n\'Smooth with Guarantees: Same as smooth, but disables crits below 50 and hits below 0 advantage (grazes and misses can always happen).\'");
 
 	generalSettings.addBooleanSetting(
 		"GC_KeepVanillaDiminishingDefense", 

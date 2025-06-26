@@ -187,9 +187,9 @@
 		{
 			case "Piecewise Linear":
         return computePiecewiseLinearHitOutcomeChances(advantage);
-			case "Logistics Curve":
+			case "Smooth":
         return computeLogisticsCurveHitOutcomeChances(advantage);
-      case "Logistics Curve with Guarantees":
+      case "Smooth with Guarantees":
         return computeLogisticsCurveWithGuaranteesHitOutcomeChances(advantage);
 		}
 	}
