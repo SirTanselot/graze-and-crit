@@ -33,8 +33,10 @@
 		if (chances.miss > 0.0) {
 			possible_outcomes.append(this.Const.UI.getColorized("miss", colors.miss));
 			outcome_chances.append(this.Const.UI.getColorized(chances.miss, colors.miss));
-			// No need to print miss threshold. Is always 100.
-			// needed_rolls.append(this.Const.UI.getColorized(thresholds.miss, colors.miss));
+			// Miss threshold is always 100. No need to print it unless all other hit chances are 0.
+      if (needed_rolls.len() == 0) {
+			  needed_rolls.append(this.Const.UI.getColorized(thresholds.miss, colors.miss));
+      }
 		} 
 
 		local possible_outcomes_str = possible_outcomes[0];
