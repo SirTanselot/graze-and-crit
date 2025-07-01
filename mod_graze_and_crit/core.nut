@@ -140,7 +140,7 @@
       local hitAtZero = computeLogisticsCurveHitOutcomeChances(0).hit;
       local hitAtMinusX = computeLogisticsCurveHitOutcomeChances(-x).hit;
       hitReduction = 2*hitAtZero - hitAtMinusX; // Reflect.
-      hitReduction = hitReduction * (1.0 - quadraticS(x/150)); // Decay.      
+      hitReduction = hitReduction * (1.0 - quadraticS(x/125.0)); // Decay.      
     }
 
     // Ensure that crits don't happen below 50 advantage.
