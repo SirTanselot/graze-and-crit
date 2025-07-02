@@ -20,7 +20,7 @@
 		crit = 1.5,
 	},
 
-  graze_count_as_miss_percentage = 50.0,
+  graze_count_as_miss_percentage = 0.0,
 
 	HitOutcomeColors = {
 		// TODO: Config?

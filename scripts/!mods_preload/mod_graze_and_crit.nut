@@ -56,7 +56,7 @@
 		::GrazeAndCrit.Config.graze_count_as_miss_percentage, 
 		0.0, 100.0, 5.0,
 		"Percentage of grazes that fail to apply effects",
-		"Experimental feature that makes some portion of grazes to not register as hits for the purposes of applying certain effects. [Default: 50 percent. Set to 0 to disable.]")
+		"Experimental feature that makes some portion of grazes to not register as hits for the purposes of applying certain effects. Set to 0 to disable. REFORGED: This causes a crash when killing fleeing enemies with a grazing attack of opportunity. [Default: 0 percent.]")
 	.addBeforeChangeCallback(function( _newValue ) { ::GrazeAndCrit.Config.graze_count_as_miss_percentage = _newValue; });
 
  	generalSettings.addRangeSetting(
