@@ -173,8 +173,7 @@
 
 		// Graze and crit change:
 		// 1) Die has 100x more sides for more precision. 
-		// 2) Lucky defender is factored in advance, by rolling twice and taking the min.
-		// TODO(Graze and Crit): Expose precision to config?
+		// 2) Lucky defender is factored in advance, by rolling twice and taking the max. (Higher roll is preferable to defender since in BB, lower rolls are more likely to hit.)
 		local roll = 0;
 		{
 			local precisionMultiplier = ::GrazeAndCrit.Config.PrecisionMultiplier;
@@ -183,7 +182,7 @@
 			if (this.Math.rand(1, 100) <= _targetEntity.getCurrentProperties().RerollDefenseChance)
 			{
 				local second_roll = 1.0 * this.Math.rand(1.0, 100.0*precisionMultiplier) / precisionMultiplier;
-				roll = roll < second_roll ? roll : second_roll;
+				roll = roll > second_roll ? roll : second_roll;
 			}
 		}
 
