@@ -1,7 +1,7 @@
 ::GrazeAndCrit <- {
 	ID = "mod_graze_and_crit",
 	Name = "Graze and Crit",
-	Version = "1.1.1"
+	Version = "1.1.2"
 }
 
 ::GrazeAndCrit.MH <- ::Hooks.register(::GrazeAndCrit.ID, ::GrazeAndCrit.Version, ::GrazeAndCrit.Name);
