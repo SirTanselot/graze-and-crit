@@ -219,8 +219,9 @@
     else {
  			this.MV_onAttackEntityMissed(attackInfo);
     }
-    // HACKY SHOT IN THE DARK: skills seem to use this return value to decide 
-    // whether to apply effects or not.
-    return outcome.applyEffects;
+
+    // GRAZE AND CRIT: Original return value indicates whether there is a hit. Skills seem to use this information to decide whether to apply status effects. We return in case of grazes that should not apply effects.
+    // NOTE: We make an exception and return true for grazes that kill the target. Otherwise, there is a crash when the hit was through an attack of opportunity.
+    return outcome.applyEffects || (_targetEntity.m.Hitpoints <= 0)
 	};
 });
